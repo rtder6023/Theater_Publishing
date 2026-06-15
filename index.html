@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=1080, initial-scale=1.0, user-scalable=no"
+    />
+    <title>에어포스 키오스크</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="kiosk" id="kiosk">
+      <!-- Screen 0: Home -->
+      <section class="screen screen--active" data-screen="home">
+        <header class="kiosk-header">
+          <div class="kiosk-header__brand">
+            <span class="logo"
+              ><img
+                src="https://www.airpos.co.kr/images/common/logo.png"
+                alt="Airpos Logo"
+                className="w-full h-full object-contain"
+            /></span>
+            <span class="kiosk-header__location"></span>
+          </div>
+          <div class="kiosk-header__time" id="currentTime">--:--</div>
+        </header>
+
+        <div class="home-hero">
+          <h1 class="home-hero__title">무엇을 도와드릴까요?</h1>
+          <p class="home-hero__sub">터치하여 서비스를 선택해 주세요</p>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-btn home-btn--book" data-go="movie">
+            <span class="home-btn__icon">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect
+                  x="8"
+                  y="12"
+                  width="32"
+                  height="24"
+                  rx="2"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <path
+                  d="M8 20h32M16 12v8M32 12v8"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+              </svg>
+            </span>
+            <span class="home-btn__label">티켓 예매하기</span>
+          </button>
+          <button class="home-btn home-btn--print" data-go="print">
+            <span class="home-btn__icon">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect
+                  x="10"
+                  y="6"
+                  width="28"
+                  height="12"
+                  rx="2"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <rect
+                  x="6"
+                  y="18"
+                  width="36"
+                  height="20"
+                  rx="2"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <rect
+                  x="14"
+                  y="26"
+                  width="20"
+                  height="14"
+                  rx="1"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+              </svg>
+            </span>
+            <span class="home-btn__label">티켓 출력하기</span>
+          </button>
+        </div>
+
+        <footer class="kiosk-footer">
+          <p>화면을 터치하여 시작하세요</p>
+        </footer>
+      </section>
+
+      <!-- Screen 1: Movie Selection -->
+      <section class="screen" data-screen="movie">
+        <header class="kiosk-header kiosk-header--compact">
+          <button class="btn-back" data-go="home" aria-label="처음으로">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <span class="logo logo--sm"
+            ><img
+              src="https://www.airpos.co.kr/images/common/logo.png"
+              alt="Airpos Logo"
+              className="w-full h-full object-contain"
+          /></span>
+          <div class="kiosk-header__time" data-time></div>
+        </header>
+
+        <nav class="stepper" aria-label="예매 단계">
+          <div class="stepper__item stepper__item--active">
+            <span>1</span> 영화선택
+          </div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>2</span> 인원/좌석</div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>3</span> 결제</div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>4</span> 완료</div>
+        </nav>
+
+        <div class="date-picker">
+          <button
+            class="date-picker__arrow"
+            id="datePrev"
+            aria-label="이전 날짜"
+          >
+            ‹
+          </button>
+          <div class="date-picker__list" id="dateList"></div>
+          <button
+            class="date-picker__arrow"
+            id="dateNext"
+            aria-label="다음 날짜"
+          >
+            ›
+          </button>
+        </div>
+
+        <div class="movie-list" id="movieList"></div>
+
+        <footer class="action-bar">
+          <button class="btn btn--secondary" data-go="home">이전</button>
+          <button class="btn btn--primary" id="btnToSeat" disabled>다음</button>
+        </footer>
+      </section>
+
+      <!-- Screen 2: Seat Selection -->
+      <section class="screen" data-screen="seat">
+        <header class="kiosk-header kiosk-header--compact">
+          <button class="btn-back" data-go="movie" aria-label="이전">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <span class="logo logo--sm"
+            ><img
+              src="https://www.airpos.co.kr/images/common/logo.png"
+              alt="Airpos Logo"
+              className="w-full h-full object-contain"
+          /></span>
+          <div class="kiosk-header__time" data-time></div>
+        </header>
+
+        <nav class="stepper" aria-label="예매 단계">
+          <div class="stepper__item stepper__item--done">
+            <span>✓</span> 영화선택
+          </div>
+          <div class="stepper__line stepper__line--done"></div>
+          <div class="stepper__item stepper__item--active">
+            <span>2</span> 인원/좌석
+          </div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>3</span> 결제</div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>4</span> 완료</div>
+        </nav>
+
+        <div class="seat-info">
+          <div class="seat-info__poster" id="seatMoviePoster"></div>
+          <div class="seat-info__detail">
+            <h2 id="seatMovieTitle">영화 제목</h2>
+            <p id="seatMovieMeta">날짜 · 시간 · 관</p>
+          </div>
+        </div>
+
+        <div class="screen-label">SCREEN</div>
+
+        <div class="seat-legend">
+          <span><i class="legend legend--available"></i> 선택가능</span>
+          <span><i class="legend legend--selected"></i> 선택됨</span>
+          <span><i class="legend legend--occupied"></i> 예매완료</span>
+        </div>
+
+        <div class="seat-map-wrap">
+          <div class="seat-map" id="seatMap">123</div>
+        </div>
+
+        <div class="seat-summary">
+          <span>선택 좌석: <strong id="selectedSeatsText">없음</strong></span>
+          <span class="seat-summary__count"
+            >총 <strong id="selectedCount">0</strong>석</span
+          >
+        </div>
+
+        <footer class="action-bar">
+          <button class="btn btn--secondary" data-go="movie">영화 선택</button>
+          <button class="btn btn--primary" id="btnToPayment" disabled>
+            결제하기
+          </button>
+        </footer>
+      </section>
+
+      <!-- Screen 3: Payment -->
+      <section class="screen" data-screen="payment">
+        <header class="kiosk-header kiosk-header--compact">
+          <button class="btn-back" data-go="seat" aria-label="이전">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <span class="logo logo--sm"
+            ><img
+              src="https://www.airpos.co.kr/images/common/logo.png"
+              alt="Airpos Logo"
+              className="w-full h-full object-contain"
+          /></span>
+          <div class="kiosk-header__time" data-time></div>
+        </header>
+
+        <nav class="stepper" aria-label="예매 단계">
+          <div class="stepper__item stepper__item--done">
+            <span>✓</span> 영화선택
+          </div>
+          <div class="stepper__line stepper__line--done"></div>
+          <div class="stepper__item stepper__item--done">
+            <span>✓</span> 인원/좌석
+          </div>
+          <div class="stepper__line stepper__line--done"></div>
+          <div class="stepper__item stepper__item--active">
+            <span>3</span> 결제
+          </div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>4</span> 완료</div>
+        </nav>
+
+        <h2 class="section-title">예매 정보 확인</h2>
+
+        <div class="order-card">
+          <div class="order-card__poster" id="orderPoster"></div>
+          <div class="order-card__info">
+            <h3 id="orderTitle">영화 제목</h3>
+            <dl class="order-detail">
+              <div>
+                <dt>상영일</dt>
+                <dd id="orderDate">-</dd>
+              </div>
+              <div>
+                <dt>상영시간</dt>
+                <dd id="orderTime">-</dd>
+              </div>
+              <div>
+                <dt>상영관</dt>
+                <dd id="orderTheater">-</dd>
+              </div>
+              <div>
+                <dt>좌석</dt>
+                <dd id="orderSeats">-</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="price-box">
+          <div class="price-row">
+            <span>성인 <span id="priceQty">1</span>매 × 15,000원</span>
+            <span id="priceSubtotal">15,000원</span>
+          </div>
+          <div class="price-row price-row--total">
+            <span>총 결제금액</span>
+            <span id="priceTotal">15,000원</span>
+          </div>
+        </div>
+
+        <h2 class="section-title">결제 수단 선택</h2>
+
+        <div class="payment-methods">
+          <button class="payment-card payment-card--active" data-method="card">
+            <svg viewBox="0 0 48 48" fill="none">
+              <rect
+                x="4"
+                y="12"
+                width="40"
+                height="26"
+                rx="3"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path d="M4 20h40" stroke="currentColor" stroke-width="2" />
+            </svg>
+            <span>신용/체크카드</span>
+          </button>
+          <button class="payment-card" data-method="mobile">
+            <svg viewBox="0 0 48 48" fill="none">
+              <rect
+                x="14"
+                y="6"
+                width="20"
+                height="36"
+                rx="3"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle cx="24" cy="36" r="2" fill="currentColor" />
+            </svg>
+            <span>모바일/바코드</span>
+          </button>
+        </div>
+
+        <footer class="action-bar">
+          <button class="btn btn--secondary" data-go="seat">이전</button>
+          <button class="btn btn--primary" id="btnPay">결제하기</button>
+        </footer>
+      </section>
+
+      <!-- Screen 4: Complete -->
+      <section class="screen" data-screen="complete">
+        <div class="complete-content">
+          <div class="complete-icon">
+            <svg viewBox="0 0 120 120" fill="none">
+              <circle
+                cx="60"
+                cy="60"
+                r="54"
+                stroke="#e50914"
+                stroke-width="4"
+              />
+              <path
+                d="M38 60l16 16 28-28"
+                stroke="#e50914"
+                stroke-width="5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <h1 class="complete-title">예매가 완료되었습니다</h1>
+          <p class="complete-sub">티켓이 출력됩니다. 잠시만 기다려 주세요.</p>
+
+          <div class="complete-ticket">
+            <div class="complete-ticket__machine">
+              <div class="complete-ticket__slot"></div>
+              <div class="complete-ticket__paper"></div>
+            </div>
+          </div>
+
+          <div class="complete-info" id="completeInfo"></div>
+
+          <button class="btn2 btn--primary btn--large full" data-go="home">
+            처음으로
+          </button>
+        </div>
+      </section>
+
+      <!-- Screen: Print (placeholder) -->
+      <section class="screen" data-screen="print">
+        <header class="kiosk-header kiosk-header--compact">
+          <button class="btn-back" data-go="home" aria-label="처음으로">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <span class="logo logo--sm"
+            ><img
+              src="https://www.airpos.co.kr/images/common/logo.png"
+              alt="Airpos Logo"
+              className="w-full h-full object-contain"
+          /></span>
+        </header>
+        <div class="print-content">
+          <h2 class="section-title">티켓 출력</h2>
+          <p class="print-desc">예매번호 또는 바코드를 스캔해 주세요</p>
+          <div class="barcode-scanner">
+            <div class="barcode-scanner__frame"></div>
+            <p>바코드 리더기에 티켓을 대 주세요</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
