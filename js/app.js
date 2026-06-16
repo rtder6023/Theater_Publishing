@@ -1,4 +1,6 @@
-const TICKET_PRICE = 15000;
+const ADULT_PRICE = 15000;
+const YOUTH_PRICE = 12000;
+const MAX_PERSONNEL = 100;
 const ROWS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 const SEATS_PER_ROW = 14;
 const AISLE_AFTER = 7;
@@ -50,9 +52,6 @@ const MOVIES = [
     genre: "SF · 드라마 · 166분",
     poster: "https://picsum.photos/seed/dune/200/280",
     showtimes: [
-      // { time: '13:00', theater: 'IMAX 1관' },
-      // { time: '17:30', theater: 'IMAX 1관' },
-      // { time: '21:00', theater: 'IMAX 1관' },
       { time: "13:00", theater: "1관 1층" },
       { time: "17:30", theater: "1관 1층" },
       { time: "21:00", theater: "1관 1층" },
@@ -65,10 +64,24 @@ const state = {
   selectedDate: null,
   selectedMovie: null,
   selectedShowtime: null,
+  adultCount: 0,
+  youthCount: 0,
   selectedSeats: [],
   paymentMethod: "card",
   occupiedSeats: generateOccupiedSeats(),
 };
+
+function getTotalPersonnel() {
+  return state.adultCount + state.youthCount;
+}
+
+function getRequiredSeatCount() {
+  return getTotalPersonnel();
+}
+
+function getTotalPrice() {
+  return state.adultCount * ADULT_PRICE + state.youthCount * YOUTH_PRICE;
+}
 
 function generateOccupiedSeats() {
   const occupied = new Set();
@@ -190,18 +203,73 @@ function renderMovies() {
     });
 }
 
+function resetPersonnel() {
+  state.adultCount = 0;
+  state.youthCount = 0;
+  state.selectedSeats = [];
+}
+
 function selectShowtime(movieId, idx) {
   const movie = MOVIES.find((m) => m.id === movieId);
   const showtime = movie.showtimes[idx];
   state.selectedMovie = movie;
   state.selectedShowtime = { movieId, idx, ...showtime };
-  state.selectedSeats = [];
+  resetPersonnel();
   renderMovies();
-  document.getElementById("btnToSeat").disabled = false;
+  document.getElementById("btnToPersonnel").disabled = false;
+}
+
+function updatePersonnelUI() {
+  const total = getTotalPersonnel();
+
+  document.getElementById("adultCount").textContent = state.adultCount;
+  document.getElementById("youthCount").textContent = state.youthCount;
+  document.getElementById("totalPersonnel").textContent = total;
+
+  document.getElementById("adultMinus").disabled = state.adultCount <= 0;
+  document.getElementById("youthMinus").disabled = state.youthCount <= 0;
+  document.getElementById("adultPlus").disabled = total >= MAX_PERSONNEL;
+  document.getElementById("youthPlus").disabled = total >= MAX_PERSONNEL;
+
+  document.getElementById("btnToSeat").disabled = total === 0;
+}
+
+function changePersonnel(type, delta) {
+  const total = getTotalPersonnel();
+  if (delta > 0 && total >= MAX_PERSONNEL) return;
+  if (type === "adult") {
+    if (delta < 0 && state.adultCount <= 0) return;
+    state.adultCount += delta;
+  } else {
+    if (delta < 0 && state.youthCount <= 0) return;
+    state.youthCount += delta;
+  }
+  state.selectedSeats = [];
+  updatePersonnelUI();
+}
+
+function updatePersonnelScreenInfo() {
+  const { selectedMovie: movie, selectedShowtime: st, selectedDate } = state;
+  if (!movie || !st) return;
+
+  const dateObj = new Date(selectedDate + "T00:00:00");
+  const dateStr = dateObj.toLocaleDateString("ko-KR", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
+
+  document.getElementById("personnelMoviePoster").style.backgroundImage =
+    `url('${movie.poster}')`;
+  document.getElementById("personnelMovieTitle").textContent = movie.title;
+  document.getElementById("personnelMovieMeta").textContent =
+    `${dateStr} · ${st.time} · ${st.theater}`;
 }
 
 function renderSeatMap() {
   const map = document.getElementById("seatMap");
+  const required = getRequiredSeatCount();
+
   map.innerHTML = ROWS.map((row) => {
     let seatsHtml = "";
     for (let i = 1; i <= SEATS_PER_ROW; i++) {
@@ -214,15 +282,8 @@ function renderSeatMap() {
       let cls = "seat";
       if (isOccupied) cls += " seat--occupied";
       else if (isSelected) cls += " seat--selected";
-      {
-        isOccupied || isSelected
-          ? (seatsHtml += `<button class="${cls}" value="1" data-seat="${id}" ${isOccupied ? "disabled" : ""} aria-label="${id}"></button>`)
-          : (seatsHtml += `<button class="${cls}" value="1" data-seat="${id}" ${isOccupied ? "disabled" : ""} aria-label="${id}">${i}</button>`);
-      }
-      // seatsHtml += `<button class="${cls}" value="1" data-seat="${id}" ${isOccupied ? "disabled" : ""} aria-label="${id}"></button>`;
 
-      console.log(row);
-      console.log(seatsHtml);
+      seatsHtml += `<button class="${cls}" data-seat="${id}" ${isOccupied ? "disabled" : ""} aria-label="${id}">${isOccupied || isSelected ? "" : i}</button>`;
     }
     return `
       <div class="seat-row">
@@ -237,22 +298,25 @@ function renderSeatMap() {
   });
 
   updateSeatSummary();
+  document.getElementById("requiredSeatCount").textContent = required;
+  document.getElementById("btnToPayment").disabled =
+    state.selectedSeats.length !== required;
 }
 
 function toggleSeat(id) {
+  const required = getRequiredSeatCount();
   const idx = state.selectedSeats.indexOf(id);
+
   if (idx >= 0) {
     state.selectedSeats.splice(idx, 1);
   } else {
-    if (state.selectedSeats.length >= 8) return;
+    if (state.selectedSeats.length >= required) return;
     state.selectedSeats.push(id);
     state.selectedSeats.sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true }),
     );
   }
   renderSeatMap();
-  document.getElementById("btnToPayment").disabled =
-    state.selectedSeats.length === 0;
 }
 
 function updateSeatSummary() {
@@ -279,7 +343,7 @@ function updateSeatScreenInfo() {
     `url('${movie.poster}')`;
   document.getElementById("seatMovieTitle").textContent = movie.title;
   document.getElementById("seatMovieMeta").textContent =
-    `${dateStr} · ${st.time} · ${st.theater}`;
+    `${dateStr} · ${st.time} · ${st.theater} · ${getTotalPersonnel()}명 (성인 ${state.adultCount} · 청소년 ${state.youthCount})`;
 }
 
 function updatePaymentScreen() {
@@ -288,6 +352,8 @@ function updatePaymentScreen() {
     selectedShowtime: st,
     selectedDate,
     selectedSeats,
+    adultCount,
+    youthCount,
   } = state;
   if (!movie || !st) return;
 
@@ -298,8 +364,6 @@ function updatePaymentScreen() {
     day: "numeric",
     weekday: "short",
   });
-  const qty = selectedSeats.length;
-  const total = qty * TICKET_PRICE;
 
   document.getElementById("orderPoster").style.backgroundImage =
     `url('${movie.poster}')`;
@@ -307,10 +371,35 @@ function updatePaymentScreen() {
   document.getElementById("orderDate").textContent = dateStr + "요일";
   document.getElementById("orderTime").textContent = st.time;
   document.getElementById("orderTheater").textContent = st.theater;
+  document.getElementById("orderPersonnel").textContent =
+    `성인 ${adultCount} · 청소년 ${youthCount} (총 ${adultCount + youthCount}명)`;
   document.getElementById("orderSeats").textContent = selectedSeats.join(", ");
-  document.getElementById("priceQty").textContent = qty;
-  document.getElementById("priceSubtotal").textContent = formatPrice(total);
-  document.getElementById("priceTotal").textContent = formatPrice(total);
+
+  const priceRows = [];
+  if (adultCount > 0) {
+    priceRows.push(`
+      <div class="price-row">
+        <span>성인 ${adultCount}매 × ${formatPrice(ADULT_PRICE)}</span>
+        <span>${formatPrice(adultCount * ADULT_PRICE)}</span>
+      </div>
+    `);
+  }
+  if (youthCount > 0) {
+    priceRows.push(`
+      <div class="price-row">
+        <span>청소년 ${youthCount}매 × ${formatPrice(YOUTH_PRICE)}</span>
+        <span>${formatPrice(youthCount * YOUTH_PRICE)}</span>
+      </div>
+    `);
+  }
+
+  document.getElementById("priceBox").innerHTML = `
+    ${priceRows.join("")}
+    <div class="price-row price-row--total">
+      <span>총 결제금액</span>
+      <span id="priceTotal">${formatPrice(getTotalPrice())}</span>
+    </div>
+  `;
 }
 
 function updateCompleteScreen() {
@@ -319,13 +408,16 @@ function updateCompleteScreen() {
     selectedShowtime: st,
     selectedSeats,
     selectedDate,
+    adultCount,
+    youthCount,
   } = state;
-  console.log(selectedDate);
+
   document.getElementById("completeInfo").innerHTML = `
     <strong>${movie.title}</strong><br>
     ${selectedDate} · ${st.time} · ${st.theater}<br>
+    인원: 성인 ${adultCount} · 청소년 ${youthCount}<br>
     좌석: ${selectedSeats.join(", ")}<br>
-    결제금액: ${formatPrice(selectedSeats.length * TICKET_PRICE)}
+    결제금액: ${formatPrice(getTotalPrice())}
   `;
 }
 
@@ -333,15 +425,22 @@ function navigateTo(name) {
   if (name === "movie") {
     initDates();
     renderMovies();
-    document.getElementById("btnToSeat").disabled = !state.selectedShowtime;
+    document.getElementById("btnToPersonnel").disabled =
+      !state.selectedShowtime;
+  }
+  if (name === "personnel") {
+    updatePersonnelScreenInfo();
+    updatePersonnelUI();
   }
   if (name === "seat") {
+    if (getTotalPersonnel() === 0) return;
+    state.selectedSeats = [];
     updateSeatScreenInfo();
     renderSeatMap();
-    document.getElementById("btnToPayment").disabled =
-      state.selectedSeats.length === 0;
   }
   if (name === "payment") {
+    const required = getRequiredSeatCount();
+    if (state.selectedSeats.length !== required) return;
     updatePaymentScreen();
   }
   if (name === "complete") {
@@ -350,9 +449,9 @@ function navigateTo(name) {
   if (name === "home") {
     state.selectedMovie = null;
     state.selectedShowtime = null;
-    state.selectedSeats = [];
+    resetPersonnel();
     state.occupiedSeats = generateOccupiedSeats();
-    document.getElementById("btnToSeat").disabled = true;
+    document.getElementById("btnToPersonnel").disabled = true;
   }
   showScreen(name);
 }
@@ -362,6 +461,9 @@ document.querySelectorAll("[data-go]").forEach((el) => {
 });
 
 document
+  .getElementById("btnToPersonnel")
+  .addEventListener("click", () => navigateTo("personnel"));
+document
   .getElementById("btnToSeat")
   .addEventListener("click", () => navigateTo("seat"));
 document
@@ -370,6 +472,19 @@ document
 document
   .getElementById("btnPay")
   .addEventListener("click", () => navigateTo("complete"));
+
+document
+  .getElementById("adultPlus")
+  .addEventListener("click", () => changePersonnel("adult", 1));
+document
+  .getElementById("adultMinus")
+  .addEventListener("click", () => changePersonnel("adult", -1));
+document
+  .getElementById("youthPlus")
+  .addEventListener("click", () => changePersonnel("youth", 1));
+document
+  .getElementById("youthMinus")
+  .addEventListener("click", () => changePersonnel("youth", -1));
 
 document.querySelectorAll(".payment-card").forEach((card) => {
   card.addEventListener("click", () => {

@@ -698,6 +698,136 @@ body {
   justify-content: center;
 }
 
+/* ── Personnel Selection ── */
+.personnel-info {
+  display: flex;
+  gap: 20px;
+  padding: 0 32px 8px;
+  flex-shrink: 0;
+}
+
+.personnel-info__poster {
+  width: 80px;
+  height: 112px;
+  border-radius: var(--radius-sm);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.personnel-info__detail h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.personnel-info__detail p {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.personnel-desc {
+  padding: 0 32px 24px;
+  font-size: 16px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.personnel-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 32px;
+}
+
+.personnel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 32px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+}
+
+.personnel-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.personnel-row__label {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.personnel-row__price {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.personnel-counter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.personnel-counter__btn {
+  width: 56px;
+  height: 56px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.personnel-counter__btn:active:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: var(--red);
+}
+
+.personnel-counter__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.personnel-counter__count {
+  font-size: 36px;
+  font-weight: 700;
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.personnel-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 32px;
+  padding: 20px 28px;
+  background: rgba(229, 9, 20, 0.1);
+  border: 2px solid var(--red);
+  border-radius: var(--radius);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.personnel-summary strong {
+  color: var(--red);
+  font-size: 28px;
+}
+
 .seat-summary {
   display: flex;
   justify-content: space-between;

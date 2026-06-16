@@ -57,9 +57,10 @@
                 />
               </svg>
             </span>
-            <span class="home-btn__label">티켓 예매하기</span>
+            <!-- <span class="home-btn__label">티켓 예매하기</span> -->
+            <span class="home-btn__label">상영예약</span>
           </button>
-          <button class="home-btn home-btn--print" data-go="print">
+          <!-- <button class="home-btn home-btn--print" data-go="print">
             <span class="home-btn__icon">
               <svg viewBox="0 0 48 48" fill="none">
                 <rect
@@ -92,7 +93,7 @@
               </svg>
             </span>
             <span class="home-btn__label">티켓 출력하기</span>
-          </button>
+          </button> -->
         </div>
 
         <footer class="kiosk-footer">
@@ -156,14 +157,126 @@
 
         <footer class="action-bar">
           <button class="btn btn--secondary" data-go="home">이전</button>
-          <button class="btn btn--primary" id="btnToSeat" disabled>다음</button>
+          <button class="btn btn--primary" id="btnToPersonnel" disabled>
+            다음
+          </button>
         </footer>
       </section>
 
-      <!-- Screen 2: Seat Selection -->
-      <section class="screen" data-screen="seat">
+      <!-- Screen 2: Personnel Selection -->
+      <section class="screen" data-screen="personnel">
         <header class="kiosk-header kiosk-header--compact">
           <button class="btn-back" data-go="movie" aria-label="이전">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <span class="logo logo--sm"
+            ><img
+              src="https://www.airpos.co.kr/images/common/logo.png"
+              alt="Airpos Logo"
+              className="w-full h-full object-contain"
+          /></span>
+          <div class="kiosk-header__time" data-time></div>
+        </header>
+
+        <nav class="stepper" aria-label="예매 단계">
+          <div class="stepper__item stepper__item--done">
+            <span>✓</span> 영화선택
+          </div>
+          <div class="stepper__line stepper__line--done"></div>
+          <div class="stepper__item stepper__item--active">
+            <span>2</span> 인원/좌석
+          </div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>3</span> 결제</div>
+          <div class="stepper__line"></div>
+          <div class="stepper__item"><span>4</span> 완료</div>
+        </nav>
+
+        <div class="personnel-info">
+          <div class="personnel-info__poster" id="personnelMoviePoster"></div>
+          <div class="personnel-info__detail">
+            <h2 id="personnelMovieTitle">영화 제목</h2>
+            <p id="personnelMovieMeta">날짜 · 시간 · 관</p>
+          </div>
+        </div>
+
+        <h2 class="section-title">인원 선택</h2>
+        <!-- <p class="personnel-desc">성인 · 청소년 인원을 선택해 주세요 (최대 8명)</p> -->
+        <p class="personnel-desc">성인 · 청소년 인원을 선택해 주세요</p>
+
+        <div class="personnel-list">
+          <div class="personnel-row">
+            <div class="personnel-row__info">
+              <span class="personnel-row__label">성인</span>
+              <span class="personnel-row__price">15,000원</span>
+            </div>
+            <div class="personnel-counter">
+              <button
+                class="personnel-counter__btn"
+                id="adultMinus"
+                aria-label="성인 감소"
+              >
+                −
+              </button>
+              <span class="personnel-counter__count" id="adultCount">0</span>
+              <button
+                class="personnel-counter__btn"
+                id="adultPlus"
+                aria-label="성인 증가"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div class="personnel-row">
+            <div class="personnel-row__info">
+              <span class="personnel-row__label">청소년</span>
+              <span class="personnel-row__price">12,000원</span>
+            </div>
+            <div class="personnel-counter">
+              <button
+                class="personnel-counter__btn"
+                id="youthMinus"
+                aria-label="청소년 감소"
+              >
+                −
+              </button>
+              <span class="personnel-counter__count" id="youthCount">0</span>
+              <button
+                class="personnel-counter__btn"
+                id="youthPlus"
+                aria-label="청소년 증가"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="personnel-summary">
+          <span>총 인원</span>
+          <strong><span id="totalPersonnel">0</span>명</strong>
+        </div>
+
+        <footer class="action-bar">
+          <button class="btn btn--secondary" data-go="movie">이전</button>
+          <button class="btn btn--primary" id="btnToSeat" disabled>
+            좌석 선택
+          </button>
+        </footer>
+      </section>
+
+      <!-- Screen 3: Seat Selection -->
+      <section class="screen" data-screen="seat">
+        <header class="kiosk-header kiosk-header--compact">
+          <button class="btn-back" data-go="personnel" aria-label="이전">
             <svg viewBox="0 0 24 24" fill="none">
               <path
                 d="M15 6l-6 6 6 6"
@@ -219,12 +332,15 @@
         <div class="seat-summary">
           <span>선택 좌석: <strong id="selectedSeatsText">없음</strong></span>
           <span class="seat-summary__count"
-            >총 <strong id="selectedCount">0</strong>석</span
+            ><strong id="selectedCount">0</strong> /
+            <strong id="requiredSeatCount">0</strong>석</span
           >
         </div>
 
         <footer class="action-bar">
-          <button class="btn btn--secondary" data-go="movie">영화 선택</button>
+          <button class="btn btn--secondary" data-go="personnel">
+            인원 선택
+          </button>
           <button class="btn btn--primary" id="btnToPayment" disabled>
             결제하기
           </button>
@@ -289,6 +405,10 @@
                 <dd id="orderTheater">-</dd>
               </div>
               <div>
+                <dt>인원</dt>
+                <dd id="orderPersonnel">-</dd>
+              </div>
+              <div>
                 <dt>좌석</dt>
                 <dd id="orderSeats">-</dd>
               </div>
@@ -296,14 +416,10 @@
           </div>
         </div>
 
-        <div class="price-box">
-          <div class="price-row">
-            <span>성인 <span id="priceQty">1</span>매 × 15,000원</span>
-            <span id="priceSubtotal">15,000원</span>
-          </div>
+        <div class="price-box" id="priceBox">
           <div class="price-row price-row--total">
             <span>총 결제금액</span>
-            <span id="priceTotal">15,000원</span>
+            <span id="priceTotal">0원</span>
           </div>
         </div>
 
